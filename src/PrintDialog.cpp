@@ -43,14 +43,15 @@
  *   Copies:  [1 ^v] [x] Collate [ ] Print to file  [ ] Grayscale [ ] Save ink
  *   +- Pages to Print ------------------+  +- preview ---------------+
  *   | (o) All ( ) Current ( ) Pages [ ] |  | Scale: 94%              |
- *   | > More Options                    |  |   8.27 x 11.69 Inches   |
+ *   | > More Options                    |  |   210 x 297 mm          |
  *   +- Page Sizing & Handling ----------+  |  +-------+              |
  *   | [Size][Poster][Multiple][Booklet] |  |  | sheet |              |
  *   | options of the selected one       |  |  +-------+              |
  *   +-----------------------------------+  | [<] ======o====== [>]   |
  *   | [ ] Print on both sides of paper  |  |      Page 1 of 2        |
  *   | Orientation: (o) Auto ( ) Portr.. |  +- Paper -----------------+
- *   +- Comments & Forms ----------------+  | Size, Source, Margins   |
+ *   +- Comments & Forms ----------------+  | Size, Source, Quality,  |
+ *                                          | Margins                 |
  *                                                    [Print] [Cancel]
  *
  * More Options, the Size extras, the two-sided rows and the auto-rotate row
@@ -159,6 +160,8 @@ enum {
     IDC_PR_PAPER_SIZE,
     IDC_PR_SOURCE_LABEL,
     IDC_PR_SOURCE,
+    IDC_PR_QUALITY_LABEL,
+    IDC_PR_QUALITY,
     IDC_PR_MARGINS_LABEL,
     IDC_PR_MARGIN_LEFT_LABEL,
     IDC_PR_MARGIN_LEFT,
@@ -259,16 +262,16 @@ static const CtrlDef kPrintCtrls[] = {
     {IDC_PR_POSITION, L"COMBOBOX", StrL(""), CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP},
     {IDC_PR_OFFSET_LABEL, L"STATIC", TrN("Offset X:"), SS_LEFT},
     {IDC_PR_OFFSET_X, L"EDIT", StrL(""), ES_AUTOHSCROLL | WS_TABSTOP},
-    {IDC_PR_OFFSET_X_UNIT, L"STATIC", TrN("mm"), SS_LEFT},
+    {IDC_PR_OFFSET_X_UNIT, L"STATIC", StrL(""), SS_LEFT},
     {IDC_PR_OFFSET_Y_LABEL, L"STATIC", TrN("Offset Y:"), SS_LEFT},
     {IDC_PR_OFFSET_Y, L"EDIT", StrL(""), ES_AUTOHSCROLL | WS_TABSTOP},
-    {IDC_PR_OFFSET_UNIT, L"STATIC", TrN("mm"), SS_LEFT},
+    {IDC_PR_OFFSET_UNIT, L"STATIC", StrL(""), SS_LEFT},
     {IDC_PR_TILE_LABEL, L"STATIC", TrN("Tile Scale:"), SS_LEFT},
     {IDC_PR_TILE_EDIT, L"EDIT", StrL(""), ES_AUTOHSCROLL | WS_TABSTOP},
     {IDC_PR_TILE_PERCENT, L"STATIC", StrL("%"), SS_LEFT},
     {IDC_PR_OVERLAP_LABEL, L"STATIC", TrN("Overlap:"), SS_LEFT},
     {IDC_PR_OVERLAP_EDIT, L"EDIT", StrL(""), ES_AUTOHSCROLL | WS_TABSTOP},
-    {IDC_PR_OVERLAP_UNIT, L"STATIC", TrN("in"), SS_LEFT},
+    {IDC_PR_OVERLAP_UNIT, L"STATIC", StrL(""), SS_LEFT},
     {IDC_PR_CUT_MARKS, L"BUTTON", TrN("Cut mar&ks"), BS_AUTOCHECKBOX | WS_TABSTOP},
     {IDC_PR_LABELS, L"BUTTON", TrN("Labels"), BS_AUTOCHECKBOX | WS_TABSTOP},
     {IDC_PR_LARGE_ONLY, L"BUTTON", TrN("Tile only large pages"), BS_AUTOCHECKBOX | WS_TABSTOP},
@@ -314,7 +317,9 @@ static const CtrlDef kPrintCtrls[] = {
     {IDC_PR_PAPER_SIZE, L"COMBOBOX", StrL(""), CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP},
     {IDC_PR_SOURCE_LABEL, L"STATIC", TrN("Sou&rce:"), SS_LEFT},
     {IDC_PR_SOURCE, L"COMBOBOX", StrL(""), CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP},
-    {IDC_PR_MARGINS_LABEL, L"STATIC", TrN("Margins (mm):"), SS_LEFT},
+    {IDC_PR_QUALITY_LABEL, L"STATIC", TrN("&Quality:"), SS_LEFT},
+    {IDC_PR_QUALITY, L"COMBOBOX", StrL(""), CBS_DROPDOWNLIST | WS_VSCROLL | WS_TABSTOP},
+    {IDC_PR_MARGINS_LABEL, L"STATIC", StrL(""), SS_LEFT},
     {IDC_PR_MARGIN_LEFT_LABEL, L"STATIC", TrN("Left:"), SS_LEFT},
     {IDC_PR_MARGIN_LEFT, L"EDIT", StrL(""), ES_AUTOHSCROLL | WS_TABSTOP},
     {IDC_PR_MARGIN_RIGHT_LABEL, L"STATIC", TrN("Right:"), SS_LEFT},
@@ -443,7 +448,7 @@ static const CtrlPos kLayout[] = {
     {IDC_PR_TILE_PERCENT, 131, 303, 12, 15},
     {IDC_PR_OVERLAP_LABEL, 171, 303, 48, 15},
     {IDC_PR_OVERLAP_EDIT, 222, 299, 46, 23},
-    {IDC_PR_OVERLAP_UNIT, 272, 303, 12, 15},
+    {IDC_PR_OVERLAP_UNIT, 272, 303, 26, 15},
     {IDC_PR_CUT_MARKS, 27, 328, 120, 18},
     {IDC_PR_LABELS, 171, 328, 100, 18},
     {IDC_PR_LARGE_ONLY, 27, 352, 160, 18},
@@ -488,21 +493,23 @@ static const CtrlPos kLayout[] = {
     {IDC_PR_NEXT, 723, 368, 32, 26},
     {IDC_PR_SHEET_LABEL, 519, 398, 200, 15},
 
-    {IDC_PR_GROUP_PAPER, 468, 426, 302, 185},
+    {IDC_PR_GROUP_PAPER, 468, 426, 302, 215},
     {IDC_PR_PAPER_TITLE, 483, 441, 150, 15},
     {IDC_PR_PAPER_SIZE_LABEL, 483, 465, 54, 15},
     {IDC_PR_PAPER_SIZE, 540, 459, 215, 300},
     {IDC_PR_SOURCE_LABEL, 483, 495, 54, 15},
     {IDC_PR_SOURCE, 540, 489, 215, 200},
-    {IDC_PR_MARGINS_LABEL, 483, 523, 150, 15},
-    {IDC_PR_MARGIN_LEFT_LABEL, 483, 548, 50, 15},
-    {IDC_PR_MARGIN_LEFT, 540, 544, 50, 23},
-    {IDC_PR_MARGIN_RIGHT_LABEL, 645, 548, 56, 15},
-    {IDC_PR_MARGIN_RIGHT, 705, 544, 50, 23},
-    {IDC_PR_MARGIN_TOP_LABEL, 483, 578, 50, 15},
-    {IDC_PR_MARGIN_TOP, 540, 574, 50, 23},
-    {IDC_PR_MARGIN_BOTTOM_LABEL, 645, 578, 56, 15},
-    {IDC_PR_MARGIN_BOTTOM, 705, 574, 50, 23},
+    {IDC_PR_QUALITY_LABEL, 483, 525, 54, 15},
+    {IDC_PR_QUALITY, 540, 519, 215, 200},
+    {IDC_PR_MARGINS_LABEL, 483, 553, 150, 15},
+    {IDC_PR_MARGIN_LEFT_LABEL, 483, 578, 50, 15},
+    {IDC_PR_MARGIN_LEFT, 540, 574, 50, 23},
+    {IDC_PR_MARGIN_RIGHT_LABEL, 645, 578, 56, 15},
+    {IDC_PR_MARGIN_RIGHT, 705, 574, 50, 23},
+    {IDC_PR_MARGIN_TOP_LABEL, 483, 608, 50, 15},
+    {IDC_PR_MARGIN_TOP, 540, 604, 50, 23},
+    {IDC_PR_MARGIN_BOTTOM_LABEL, 645, 608, 56, 15},
+    {IDC_PR_MARGIN_BOTTOM, 705, 604, 50, 23},
 };
 
 struct Band {
@@ -513,7 +520,7 @@ static const Band kBandSizeExtra = {380, 49};
 static const Band kBandDuplex = {446, 47};
 static const Band kBandAutoRotate = {539, 22};
 constexpr int kLeftColumnDx = 460;
-constexpr int kRightColumnBottom = 611;
+constexpr int kRightColumnBottom = 641;
 constexpr int kDlgDx = 782;
 constexpr int kButtonDy = 26;
 // the row a combo's y is the top of: its center is half this below
@@ -539,6 +546,7 @@ struct PrintDlgState {
     HWND hwnd = nullptr;
 
     StrVec printerNames;
+    Vec<Point> resolutions;      // the printer's print qualities, in dpi
     Printer* printer = nullptr;  // capabilities of the selected printer
     DEVMODEW* devMode = nullptr; // edited by Properties and the Paper section
 
@@ -547,6 +555,7 @@ struct PrintDlgState {
     PagesToPrint pagesMode = PagesToPrint::All;
     bool moreOptions = false;
     bool printToFile = false;
+    bool inches = false;        // lengths shown in inches (US), else mm
     int layoutKey = -1;         // what LayoutDialog() last laid out for
     Vec<PRINTPAGERANGE> ranges; // set by Print
     Str outputFile;             // set by Print when printing to a file
@@ -615,6 +624,24 @@ static float GetItemFloat(PrintDlgState* d, int id, float fallback) {
 
 static void SetItemFloat(PrintDlgState* d, int id, float v) {
     HwndSetText(Item(d, id), fmt("%g", v));
+}
+
+// lengths are kept in mm and shown in the user's unit: mm, or inches in the US
+static Str LengthUnit(PrintDlgState* d) {
+    return d->inches ? Tr("in") : Tr("mm");
+}
+
+static float GetItemLength(PrintDlgState* d, int id, float fallbackMm) {
+    float v = GetItemFloat(d, id, NAN);
+    if (isnan(v)) {
+        return fallbackMm;
+    }
+    return d->inches ? v * 25.4f : v;
+}
+
+static void SetItemLength(PrintDlgState* d, int id, float mm) {
+    float v = d->inches ? mm / 25.4f : mm;
+    SetItemFloat(d, id, roundf(v * 100) / 100);
 }
 
 static int GetItemInt(PrintDlgState* d, int id, int fallback) {
@@ -899,15 +926,15 @@ static void ReadControls(PrintDlgState* d) {
     o.customScale = limitValue(GetItemFloat(d, IDC_PR_CUSTOM_EDIT, 100), 1.f, 1000.f);
     o.rotation = std::min(ComboIdx(d, IDC_PR_ROTATE), 3) * 90;
     o.position = (PrintPosition)std::min(ComboIdx(d, IDC_PR_POSITION), 8);
-    o.offsetXMm = limitValue(GetItemFloat(d, IDC_PR_OFFSET_X, 0), -1000.f, 1000.f);
-    o.offsetYMm = limitValue(GetItemFloat(d, IDC_PR_OFFSET_Y, 0), -1000.f, 1000.f);
-    o.marginLeftMm = limitValue(GetItemFloat(d, IDC_PR_MARGIN_LEFT, 0), 0.f, 200.f);
-    o.marginRightMm = limitValue(GetItemFloat(d, IDC_PR_MARGIN_RIGHT, 0), 0.f, 200.f);
-    o.marginTopMm = limitValue(GetItemFloat(d, IDC_PR_MARGIN_TOP, 0), 0.f, 200.f);
-    o.marginBottomMm = limitValue(GetItemFloat(d, IDC_PR_MARGIN_BOTTOM, 0), 0.f, 200.f);
+    o.offsetXMm = limitValue(GetItemLength(d, IDC_PR_OFFSET_X, 0), -1000.f, 1000.f);
+    o.offsetYMm = limitValue(GetItemLength(d, IDC_PR_OFFSET_Y, 0), -1000.f, 1000.f);
+    o.marginLeftMm = limitValue(GetItemLength(d, IDC_PR_MARGIN_LEFT, 0), 0.f, 200.f);
+    o.marginRightMm = limitValue(GetItemLength(d, IDC_PR_MARGIN_RIGHT, 0), 0.f, 200.f);
+    o.marginTopMm = limitValue(GetItemLength(d, IDC_PR_MARGIN_TOP, 0), 0.f, 200.f);
+    o.marginBottomMm = limitValue(GetItemLength(d, IDC_PR_MARGIN_BOTTOM, 0), 0.f, 200.f);
 
     o.posterTileScale = limitValue(GetItemFloat(d, IDC_PR_TILE_EDIT, 100), 1.f, 10000.f);
-    o.posterOverlapIn = limitValue(GetItemFloat(d, IDC_PR_OVERLAP_EDIT, 0), 0.f, 5.f);
+    o.posterOverlapMm = limitValue(GetItemLength(d, IDC_PR_OVERLAP_EDIT, 0), 0.f, 127.f);
     o.posterCutMarks = IsChecked(d, IDC_PR_CUT_MARKS);
     o.posterLabels = IsChecked(d, IDC_PR_LABELS);
     o.posterLargeOnly = IsChecked(d, IDC_PR_LARGE_ONLY);
@@ -1157,8 +1184,11 @@ static void RenderPreview(PrintDlgState* d, HDC hdc, Rect rc) {
     int x = (rc.dx - paperDx) / 2;
     int y = labelDy + (availDy - paperDy) / 2;
 
-    // "8.27 x 11.69 Inches" right above the paper
-    TempStr label = fmt("%.2f x %.2f %s", extent.dx / d->geo.dpiX, extent.dy / d->geo.dpiY, Tr("Inches"));
+    // "210 x 297 mm" or "8.27 x 11.69 in" right above the paper
+    float inchDx = extent.dx / d->geo.dpiX;
+    float inchDy = extent.dy / d->geo.dpiY;
+    TempStr label = d->inches ? fmt("%.2f x %.2f %s", inchDx, inchDy, LengthUnit(d))
+                              : fmt("%.0f x %.0f %s", inchDx * 25.4f, inchDy * 25.4f, LengthUnit(d));
     RECT labelRc{0, y - labelDy, rc.dx, y - 4};
     SetBkMode(hdc, TRANSPARENT);
     SetTextColor(hdc, ThemeWindowTextColor());
@@ -1266,33 +1296,49 @@ static void DrawRoundIcon(DRAWITEMSTRUCT* dis, const WCHAR* glyph) {
     gfx.DrawString(glyph, -1, &font, box, &format, &brush);
 }
 
-// Paper: the paper sizes and sources (trays) of the printer, the current ones selected
-static void SelectPaperAndSource(PrintDlgState* d) {
+// Paper: the paper sizes, sources (trays) and print qualities of the printer,
+// the current ones selected
+static void SelectPaperOptions(PrintDlgState* d) {
     Printer* p = d->printer;
-    if (!p || !d->devMode) {
+    DEVMODEW* dm = d->devMode;
+    if (!p || !dm) {
         return;
     }
     int paperIdx = -1;
     for (int i = 0; i < p->nPaperSizes; i++) {
-        if (p->papers[i] == d->devMode->dmPaperSize) {
+        if (p->papers[i] == dm->dmPaperSize) {
             paperIdx = i;
         }
     }
     CbSetCurrentSelection(Item(d, IDC_PR_PAPER_SIZE), paperIdx);
     int sourceIdx = -1;
     for (int i = 0; i < p->nBins; i++) {
-        if (p->bins[i] == d->devMode->dmDefaultSource) {
+        if (p->bins[i] == dm->dmDefaultSource) {
             sourceIdx = i;
         }
     }
     CbSetCurrentSelection(Item(d, IDC_PR_SOURCE), sourceIdx);
+    // 0 is "Printer default"
+    int qualityIdx = 0;
+    bool hasQuality = (dm->dmFields & DM_PRINTQUALITY) && dm->dmPrintQuality > 0;
+    for (int i = 0; hasQuality && i < len(d->resolutions); i++) {
+        Point r = d->resolutions[i];
+        bool sameY = !(dm->dmFields & DM_YRESOLUTION) || dm->dmYResolution == r.y;
+        if (r.x == dm->dmPrintQuality && sameY) {
+            qualityIdx = i + 1;
+        }
+    }
+    CbSetCurrentSelection(Item(d, IDC_PR_QUALITY), qualityIdx);
 }
 
-static void FillPaperAndSource(PrintDlgState* d) {
+static void FillPaperOptions(PrintDlgState* d) {
     HWND paper = Item(d, IDC_PR_PAPER_SIZE);
     HWND source = Item(d, IDC_PR_SOURCE);
+    HWND quality = Item(d, IDC_PR_QUALITY);
     SendMessageW(paper, CB_RESETCONTENT, 0, 0);
     SendMessageW(source, CB_RESETCONTENT, 0, 0);
+    SendMessageW(quality, CB_RESETCONTENT, 0, 0);
+    VecReset(d->resolutions);
     Printer* p = d->printer;
     int nPapers = p ? p->nPaperSizes : 0;
     int nBins = p ? p->nBins : 0;
@@ -1302,13 +1348,33 @@ static void FillPaperAndSource(PrintDlgState* d) {
     for (int i = 0; i < nBins; i++) {
         CbAddString(source, p->binNames.At(i));
     }
+
+    // the resolutions the driver offers: pairs of x, y dpi
+    CbAddString(quality, Tr("Printer default"));
+    WCHAR* nameW = p ? CWStrTemp(p->name) : nullptr;
+    int n = nameW ? (int)DeviceCapabilitiesW(nameW, nullptr, DC_ENUMRESOLUTIONS, nullptr, nullptr) : 0;
+    if (n > 0) {
+        LONG* res = AllocArray<LONG>(n * 2);
+        DeviceCapabilitiesW(nameW, nullptr, DC_ENUMRESOLUTIONS, (WCHAR*)res, nullptr);
+        for (int i = 0; i < n; i++) {
+            Point r(res[i * 2], res[i * 2 + 1]);
+            if (r.x <= 0 || r.y <= 0) {
+                continue;
+            }
+            VecAppend(d->resolutions, r);
+            TempStr text = r.x == r.y ? fmt("%d dpi", r.x) : fmt("%d x %d dpi", r.x, r.y);
+            CbAddString(quality, text);
+        }
+        free(res);
+    }
     EnableItem(d, IDC_PR_PAPER_SIZE, nPapers > 0);
     EnableItem(d, IDC_PR_SOURCE, nBins > 0);
-    SelectPaperAndSource(d);
+    EnableItem(d, IDC_PR_QUALITY, len(d->resolutions) > 0);
+    SelectPaperOptions(d);
 }
 
-// a paper size or source picked in the dialog goes into the printer settings
-static void OnPaperOrSourceChanged(PrintDlgState* d, int id) {
+// a paper size, source or quality picked in the dialog goes into the printer settings
+static void OnPaperOptionChanged(PrintDlgState* d, int id) {
     Printer* p = d->printer;
     DEVMODEW* dm = d->devMode;
     int idx = CbGetCurrentSelection(Item(d, id));
@@ -1323,6 +1389,18 @@ static void OnPaperOrSourceChanged(PrintDlgState* d, int id) {
     } else if (id == IDC_PR_SOURCE && idx < p->nBins) {
         dm->dmDefaultSource = (short)p->bins[idx];
         dm->dmFields |= DM_DEFAULTSOURCE;
+    } else if (id == IDC_PR_QUALITY && idx == 0) {
+        // back to what the driver uses by default
+        DEVMODEW* def = p->devMode;
+        dm->dmPrintQuality = def->dmPrintQuality;
+        dm->dmYResolution = def->dmYResolution;
+        dm->dmFields &= ~(DM_PRINTQUALITY | DM_YRESOLUTION);
+        dm->dmFields |= def->dmFields & (DM_PRINTQUALITY | DM_YRESOLUTION);
+    } else if (id == IDC_PR_QUALITY && idx <= len(d->resolutions)) {
+        Point r = d->resolutions[idx - 1];
+        dm->dmPrintQuality = (short)r.x;
+        dm->dmYResolution = (short)r.y;
+        dm->dmFields |= DM_PRINTQUALITY | DM_YRESOLUTION;
     }
 }
 
@@ -1337,7 +1415,7 @@ static void LoadPrinter(PrintDlgState* d, Str name) {
     }
     bool isLast = gLastDevMode && str::Eq(name, gLastPrinterName);
     d->devMode = DupDevMode(isLast ? gLastDevMode : d->printer->devMode);
-    FillPaperAndSource(d);
+    FillPaperOptions(d);
 }
 
 static void FillPrinters(PrintDlgState* d) {
@@ -1401,7 +1479,7 @@ static void SyncFromDevMode(PrintDlgState* d) {
         bool portrait = dm->dmOrientation == DMORIENT_PORTRAIT;
         SetOrientation(d, portrait ? PrintOrientation::Portrait : PrintOrientation::Landscape);
     }
-    SelectPaperAndSource(d);
+    SelectPaperOptions(d);
 }
 
 // the printer driver's own settings dialog
@@ -1507,15 +1585,20 @@ static void InitControls(PrintDlgState* d) {
     Str positions[] = {Tr("Center"), Tr("Top left"),    Tr("Top"),    Tr("Top right"),   Tr("Left"),
                        Tr("Right"),  Tr("Bottom left"), Tr("Bottom"), Tr("Bottom right")};
     FillCombo(d, IDC_PR_POSITION, positions, dimof(positions), (int)o.position);
-    SetItemFloat(d, IDC_PR_OFFSET_X, o.offsetXMm);
-    SetItemFloat(d, IDC_PR_OFFSET_Y, o.offsetYMm);
-    SetItemFloat(d, IDC_PR_MARGIN_LEFT, o.marginLeftMm);
-    SetItemFloat(d, IDC_PR_MARGIN_RIGHT, o.marginRightMm);
-    SetItemFloat(d, IDC_PR_MARGIN_TOP, o.marginTopMm);
-    SetItemFloat(d, IDC_PR_MARGIN_BOTTOM, o.marginBottomMm);
+    SetItemLength(d, IDC_PR_OFFSET_X, o.offsetXMm);
+    SetItemLength(d, IDC_PR_OFFSET_Y, o.offsetYMm);
+    SetItemLength(d, IDC_PR_MARGIN_LEFT, o.marginLeftMm);
+    SetItemLength(d, IDC_PR_MARGIN_RIGHT, o.marginRightMm);
+    SetItemLength(d, IDC_PR_MARGIN_TOP, o.marginTopMm);
+    SetItemLength(d, IDC_PR_MARGIN_BOTTOM, o.marginBottomMm);
+    int unitLabels[] = {IDC_PR_OFFSET_X_UNIT, IDC_PR_OFFSET_UNIT, IDC_PR_OVERLAP_UNIT};
+    for (int id : unitLabels) {
+        HwndSetText(Item(d, id), LengthUnit(d));
+    }
+    HwndSetText(Item(d, IDC_PR_MARGINS_LABEL), fmt("%s (%s):", Tr("Margins"), LengthUnit(d)));
 
     SetItemFloat(d, IDC_PR_TILE_EDIT, o.posterTileScale);
-    SetItemFloat(d, IDC_PR_OVERLAP_EDIT, o.posterOverlapIn);
+    SetItemLength(d, IDC_PR_OVERLAP_EDIT, o.posterOverlapMm);
     SetChecked(d, IDC_PR_CUT_MARKS, o.posterCutMarks);
     SetChecked(d, IDC_PR_LABELS, o.posterLabels);
     SetChecked(d, IDC_PR_LARGE_ONLY, o.posterLargeOnly);
@@ -1648,8 +1731,9 @@ static void OnCommand(PrintDlgState* d, int id, int code) {
             return;
         case IDC_PR_PAPER_SIZE:
         case IDC_PR_SOURCE:
+        case IDC_PR_QUALITY:
             if (code == CBN_SELCHANGE) {
-                OnPaperOrSourceChanged(d, id);
+                OnPaperOptionChanged(d, id);
                 UpdatePreview(d);
             }
             return;
@@ -1790,6 +1874,7 @@ void ShowPrintDialog(MainWindow* win) {
     d->opts.copies = 1;
     d->opts.viewPageNo = 0;
     d->moreOptions = gLastMoreOptions;
+    d->inches = GetMeasurementSystem() == 1;
 
     logf("ShowPrintDialog: file='%s' pages=%d\n", d->engine->FilePath(), d->nPages);
     DLGTEMPLATE* tpl = NewDlgTemplate(CWStrTemp(Tr("Print")));

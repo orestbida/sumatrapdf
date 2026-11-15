@@ -97,7 +97,7 @@ struct PrintJobOptions {
     RectF viewRect;
 
     float posterTileScale = 100; // percent
-    float posterOverlapIn = 0;   // inches
+    float posterOverlapMm = 0;
     bool posterCutMarks = false;
     bool posterLabels = false;
     bool posterLargeOnly = false;

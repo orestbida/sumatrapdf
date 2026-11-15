@@ -175,8 +175,15 @@ static Pixmap* RenderBand(EngineBase& engine, int pageNo, float zoom, int rotati
         return RenderPdfWithoutMarkups(pdf, pageNo, zoom, rotation, *pageRect, opts.annots, target);
     }
     RenderPageArgs args(pageNo, zoom, rotation, pageRect, target);
+    Pixmap* bmp = engine.RenderPage(args);
+    // a page with few colors comes as a palette bitmap; some band widths of
+    // those reach the printer blank (seen with Microsoft Print to PDF), so the
+    // printer gets 24 bit ones
+    if (target == RenderTarget::Print && bmp && bmp->format == PixmapFormat::Native) {
+        bmp = PixmapToBgra(bmp);
+    }
     // 24bpp: v4 (XPS) drivers render a 32bpp band as a slower RGBA PNG
-    return PixmapToBgr(engine.RenderPage(args));
+    return PixmapToBgr(bmp);
 }
 
 /*
@@ -453,7 +460,7 @@ static void PlanMultipleSheets(EngineBase& engine, const Vec<int>& pages, const 
 
 /*
  * Each page enlarged by the tile scale and cut into tiles the size of the
- * area inside the margins, overlapping by posterOverlapIn, left to right, top
+ * area inside the margins, overlapping by posterOverlapMm, left to right, top
  * to bottom.
  */
 static void PlanPosterSheets(EngineBase& engine, const Vec<int>& pages, const Print_Advanced_Data& adv,
@@ -465,8 +472,8 @@ static void PlanPosterSheets(EngineBase& engine, const Vec<int>& pages, const Pr
     Point tilePos(area.x - geo.printable.x, area.y - geo.printable.y);
     int tileDx = area.dx;
     int tileDy = area.dy;
-    int overlapX = std::min((int)(opts.posterOverlapIn * geo.dpiX), tileDx / 2);
-    int overlapY = std::min((int)(opts.posterOverlapIn * geo.dpiY), tileDy / 2);
+    int overlapX = std::min((int)(opts.posterOverlapMm * geo.dpiX / 25.4f), tileDx / 2);
+    int overlapY = std::min((int)(opts.posterOverlapMm * geo.dpiY / 25.4f), tileDy / 2);
 
     for (int pageNo : pages) {
         RectF mediabox = engine.PageMediabox(pageNo);
@@ -792,6 +799,7 @@ static bool PrintJobToDevice(PrintJob* job) {
 
     PrintGeometry geo;
     GetPrintGeometry(hdc, geo);
+    logf("PrintJob: %g x %g dpi, paper %d x %d\n", geo.dpiX, geo.dpiY, geo.paper.dx, geo.paper.dy);
     Vec<int> pages = PrintPageList(job->ranges, engine.PageCount(), job->adv.range, job->opts.reverse);
     PrintPlan plan;
     BuildPrintPlan(engine, pages, job->adv, job->opts, geo, plan);
