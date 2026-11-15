@@ -1426,6 +1426,8 @@
     <ClInclude Include="..\src\OverlayScrollbar.h" />
     <ClInclude Include="..\src\PageInfoBar.h" />
     <ClInclude Include="..\src\PageThumbnails.h" />
+    <ClInclude Include="..\src\PrintDialog.h" />
+    <ClInclude Include="..\src\PrintJob.h" />
     <ClInclude Include="..\src\RegistryPreview.h" />
     <ClInclude Include="..\src\RegistrySearchFilter.h" />
     <ClInclude Include="..\src\ScreenshotCapture.h" />
@@ -1707,6 +1709,8 @@
     <ClCompile Include="..\src\PageInfoBar.cpp" />
     <ClCompile Include="..\src\PageThumbnails.cpp" />
     <ClCompile Include="..\src\PdfTools.cpp" />
+    <ClCompile Include="..\src\PrintDialog.cpp" />
+    <ClCompile Include="..\src\PrintJob.cpp" />
     <ClCompile Include="..\src\ReadAloud.cpp" />
     <ClCompile Include="..\src\ReadingAutoScroll.cpp" />
     <ClCompile Include="..\src\RefHover.cpp" />

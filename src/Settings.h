@@ -1072,7 +1072,9 @@ struct Settings {
     // everywhere else), modern (the Windows 11 dialog), or classic (the
     // classic dialog, whose Preferences button opens the printer driver's
     // own property sheet). modern falls back to the classic dialog when
-    // Windows can't show the modern one
+    // Windows can't show the modern one. custom opens SumatraPDF's own
+    // dialog, with a preview and poster, multiple pages per sheet and
+    // booklet printing
     Str printerUI;
     // these override the default settings in the Print dialog
     PrinterDefaults printerDefaults;

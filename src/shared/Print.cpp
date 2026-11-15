@@ -116,6 +116,9 @@ PaperFormat GetPaperFormatFromSizeApprox(SizeF size) {
 #include "Translations.h"
 #include "resource.h"
 #include "PrintWin11.h"
+#if !defined(SUMATRA_NG)
+#include "PrintDialog.h"
+#endif
 
 #include "SumatraLog.h"
 
@@ -1704,6 +1707,14 @@ static void PrintCurrentFileCont(MainWindow* win, bool waitForCompletion, bool s
     // the Windows 11 dialog runs the whole job itself; -print-to and friends
     // need the synchronous classic path
     bool wantsClassic = ui == PrintUI::Classic || PrinterUIWantsClassic();
+#if !defined(SUMATRA_NG)
+    // PrinterUI = custom: our own print dialog (PrintDialog.cpp)
+    bool wantsCustom = str::EqI(gSettings->printerUI, StrL("custom"));
+    if (!waitForCompletion && !selectionByDefault && ui != PrintUI::Classic && wantsCustom) {
+        ShowPrintDialog(win);
+        return;
+    }
+#endif
     if (!waitForCompletion && !selectionByDefault && !wantsClassic) {
         bool usedWin11Dialog = TryPrintCurrentFileWin11(win, MainWindowHwnd(win), defaultScaleAdv);
         logf("PrintCurrentFile: Windows 11 dialog=%d\n", (int)usedWin11Dialog);

@@ -1054,7 +1054,7 @@ static const char* gEnumSettingsDefaultDisplayMode[] = {
 static const char* gEnumSettingsHomePageViewMode[] = {"thumbnails", "list", nullptr};
 static const char* gEnumSettingsThumbnailsType[] = {"legacy", "full", nullptr};
 static const char* gEnumSettingsFilePicker[] = {"", "os", "sumatrapdf", nullptr};
-static const char* gEnumSettingsPrinterUI[] = {"", "auto", "modern", "classic", nullptr};
+static const char* gEnumSettingsPrinterUI[] = {"", "auto", "modern", "classic", "custom", nullptr};
 static const char* gEnumSettingsToolbar[] = {"", "show", "hide", "overlay", nullptr};
 static const char* gEnumSettingsToolbarPosition[] = {"top", "bottom", nullptr};
 static const char* gEnumSettingsPageInfoLocation[] = {"notification", "legacy", "bottom", "bottom-overlay", nullptr};
@@ -1326,7 +1326,8 @@ const StructInfo gSettingsInfo = {
     "Files in Folder). Toggled by Settings / SumatraPDF File Picker\0which dialog Print (Ctrl+P) opens: empty or auto "
     "(the Windows 11 dialog with print preview where it's available, the classic one everywhere else), modern (the "
     "Windows 11 dialog), or classic (the classic dialog, whose Preferences button opens the printer driver's own "
-    "property sheet). modern falls back to the classic dialog when Windows can't show the modern one\0if true, a "
+    "property sheet). modern falls back to the classic dialog when Windows can't show the modern one. custom opens "
+    "SumatraPDF's own dialog, with a preview and poster, multiple pages per sheet and booklet printing\0if true, a "
     "document will be reloaded automatically whenever it's changed (currently doesn't work for documents shown in the "
     "ebook UI)\0if true, opening a digitally signed PDF shows whether its signatures are valid\0paths of certificate "
     "files (DER or PEM) trusted as roots when checking OFD signatures, in addition to the Windows trusted root store "

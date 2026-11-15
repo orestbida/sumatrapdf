@@ -1567,9 +1567,10 @@ const globalPrefs: Field[] = [
       "preview where it's available, the classic one everywhere else), modern (the Windows 11 " +
       "dialog), or classic (the classic dialog, whose Preferences button opens the printer " +
       "driver's own property sheet). modern falls back to the classic dialog when Windows " +
-      "can't show the modern one",
+      "can't show the modern one. custom opens SumatraPDF's own dialog, with a preview and " +
+      "poster, multiple pages per sheet and booklet printing",
   )
-    .enum(["auto", "modern", "classic"])
+    .enum(["auto", "modern", "classic", "custom"])
     .emptyMeans("auto")
     .ver("3.7"),
   field(

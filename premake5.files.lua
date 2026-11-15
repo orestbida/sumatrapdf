@@ -290,6 +290,8 @@ function sumatrapdf_files()
     "CustomZoomDialog.*",
     "PageGridDialog.*",
     "PageGridDialogCommon.*",
+    "PrintDialog.*",
+    "PrintJob.*",
     "SignDocumentDialog.*",
     "SignDocumentDialogCommon.*",
     "EbookSettingsDialog.*",
